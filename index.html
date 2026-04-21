@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安博百貨公司 - 紙幣付款速度挑戰賽</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        /* 自訂動畫 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        .animate-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 20s linear infinite;
+        }
+        
+        /* 隱藏滾動條但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-sky-50 font-sans select-none overflow-hidden h-screen text-gray-800">
+
+    <div id="app-container" class="w-full h-full relative">
+        
+        <!-- ==================== MENU SCREEN ==================== -->
+        <div id="screen-menu" class="screen w-full h-full flex flex-col items-center justify-end overflow-hidden pt-6 px-4 pb-0 bg-gradient-to-b from-sky-300 to-sky-100 relative">
+            <div class="absolute top-10 left-10 md:left-20 text-yellow-400 text-6xl md:text-8xl drop-shadow-lg opacity-90 animate-spin-slow">☀️</div>
+            <div class="absolute top-24 right-10 md:right-32 text-white text-5xl md:text-7xl opacity-80 drop-shadow-md">☁️</div>
+            <div class="absolute top-48 left-1/4 text-white text-4xl md:text-6xl opacity-60 drop-shadow-md">☁️</div>
+
+            <div class="w-full max-w-4xl flex flex-col items-center relative z-10">
+                <div class="w-full bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 rounded-t-[3rem] border-4 border-rose-700 p-6 md:p-8 text-center shadow-[0_-10px_20px_rgba(0,0,0,0.15)] relative overflow-hidden">
+                   <div class="absolute top-0 left-0 w-full h-full bg-white/10" style="background-image: radial-gradient(circle, rgba(255,255,255,0.2) 10%, transparent 10%); background-size: 20px 20px;"></div>
+                   <h1 class="text-4xl md:text-6xl font-black text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)] tracking-widest relative z-10">安博百貨公司</h1>
+                   <div class="mt-3 inline-block bg-yellow-300 text-rose-800 px-6 py-2 rounded-full font-black text-xl md:text-2xl shadow-md border-2 border-yellow-500 relative z-10">⚡ 紙幣付款速度挑戰賽 ⚡</div>
+                </div>
+                
+                <div class="w-[105%] h-8 md:h-10 z-20 -mt-2 shadow-lg" style="background-image: repeating-linear-gradient(45deg, #fbbf24, #fbbf24 40px, #ef4444 40px, #ef4444 80px); border-radius: 0 0 15px 15px;"></div>
+
+                <div class="w-[98%] bg-amber-50 border-x-[16px] border-indigo-400 p-6 md:p-10 flex flex-col md:flex-row gap-8 shadow-2xl relative z-10 rounded-b-sm">
+                   <div class="flex-1 bg-white rounded-2xl p-6 border-4 border-indigo-200 shadow-sm relative overflow-hidden">
+                      <div class="absolute -right-6 -bottom-6 text-8xl opacity-10">🛍️</div>
+                      <h3 class="font-black text-2xl mb-4 text-indigo-800 flex items-center gap-2">
+                        <i data-lucide="flame" class="text-orange-500 w-8 h-8"></i> 遊戲規則：
+                      </h3>
+                      <ul class="list-disc pl-6 space-y-3 font-bold text-gray-700 text-lg">
+                        <li>每次只購買一件商品。</li>
+                        <li>必須使用<span class="text-red-500 underline decoration-red-400 decoration-4">最少數量</span>的紙幣付款！</li>
+                        <li><strong>關卡 1</strong>：清楚提供所有付款金額資訊。</li>
+                        <li><strong>關卡 2</strong>：注意：<span class="text-red-500">不會</span>顯示目標金額！必須自己看著標價計算。</li>
+                      </ul>
+                   </div>
+                   <div class="flex-1 flex flex-col justify-center space-y-5">
+                      <input id="input-name" type="text" placeholder="請輸入挑戰者姓名" class="w-full text-center text-3xl font-black p-5 border-4 border-indigo-200 rounded-2xl focus:outline-none focus:border-indigo-500 transition-colors bg-white shadow-sm"/>
+                      <button onclick="startGame()" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-5 rounded-2xl text-2xl font-black transition-all shadow-lg flex justify-center items-center gap-2 transform hover:scale-105 active:scale-95">
+                        <i data-lucide="play" class="w-8 h-8 fill-current"></i> 開始挑戰
+                      </button>
+                      <button onclick="showScreen('leaderboard')" class="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-yellow-900 p-5 rounded-2xl text-xl font-black transition-all shadow-md flex justify-center items-center gap-2 transform hover:scale-105 active:scale-95 border-2 border-yellow-600">
+                        <i data-lucide="trophy" class="w-6 h-6"></i> 查看2B排行榜
+                      </button>
+                   </div>
+                </div>
+
+                <div class="w-[98%] h-24 md:h-32 bg-slate-100 border-x-[16px] border-b-[16px] border-indigo-400 flex justify-center items-end pb-0 rounded-b-[2rem] shadow-2xl relative z-10">
+                   <div class="w-56 md:w-80 h-20 md:h-28 bg-cyan-800 border-t-8 border-x-8 border-indigo-500 rounded-t-3xl flex relative overflow-hidden shadow-inner">
+                      <div class="w-1/2 h-full border-r-[3px] border-cyan-950 bg-cyan-600/70 flex items-center justify-center relative"><div class="absolute top-2 bottom-2 right-2 border-2 border-white/30 rounded-lg w-full"></div><div class="w-10 h-10 border-4 border-white/50 rounded-full flex items-center justify-end pr-1 z-10"><div class="w-2 h-8 bg-white/40 rounded-full"></div></div></div>
+                      <div class="w-1/2 h-full border-l-[3px] border-cyan-950 bg-cyan-600/70 flex items-center justify-center relative"><div class="absolute top-2 bottom-2 left-2 border-2 border-white/30 rounded-lg w-full"></div><div class="w-10 h-10 border-4 border-white/50 rounded-full flex items-center justify-start pl-1 z-10"><div class="w-2 h-8 bg-white/40 rounded-full"></div></div></div>
+                   </div>
+                   <div class="absolute bottom-0 left-8 md:left-16 text-6xl md:text-7xl drop-shadow-md">🪴</div>
+                   <div class="absolute bottom-0 right-8 md:right-16 text-6xl md:text-7xl drop-shadow-md">🪴</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PLAYING SCREEN ==================== -->
+        <div id="screen-playing" class="screen hidden w-full h-full flex flex-col">
+            <!-- 頂部導航 -->
+            <div class="bg-white shadow-sm px-4 py-3 flex justify-between items-center z-10 shrink-0 border-b-4 border-sky-200">
+                <button onclick="showScreen('menu')" class="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors px-2 py-1 rounded-lg hover:bg-red-50 text-lg font-bold">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i> 放棄
+                </button>
+                <div class="text-xl md:text-3xl font-black text-blue-800 tracking-wider flex items-center gap-2">
+                    關卡 <span id="ui-level">1</span> <span class="text-gray-400 hidden md:inline">|</span> <span id="ui-level-name" class="text-lg md:text-2xl text-blue-600">直接付款</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-base md:text-lg font-bold shadow-inner">
+                        題 <span id="ui-question">1</span>/3
+                    </div>
+                    <div class="bg-gray-800 text-green-400 font-mono px-4 py-1.5 rounded-lg text-xl md:text-2xl font-black shadow-inner flex items-center gap-2 w-36 justify-center">
+                        <i data-lucide="clock" class="text-gray-400 w-5 h-5"></i>
+                        <span id="ui-timer">00:00.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 遊戲區 -->
+            <div class="flex-1 flex flex-col p-2 md:p-4 gap-3 md:gap-4 overflow-hidden">
+                <div class="flex flex-col md:flex-row gap-3 md:gap-4 h-[55%] shrink-0">
+                    
+                    <!-- 左上：購物車 -->
+                    <div class="w-full md:w-1/3 bg-white rounded-2xl shadow-md border-2 border-sky-200 p-4 flex flex-col relative overflow-hidden shrink-0">
+                        <div class="absolute top-3 left-3 bg-sky-100 text-sky-800 px-3 py-1 rounded-lg font-bold text-sm md:text-base flex items-center gap-1 shadow-sm">
+                            <i data-lucide="shopping-cart" class="w-4 h-4"></i> 本次購買物品
+                        </div>
+                        <div class="flex-1 flex flex-col items-center justify-center mt-6">
+                            <span id="item-emoji" class="text-8xl md:text-9xl drop-shadow-md hover:scale-110 transition-transform cursor-default">🧸</span>
+                            <div class="flex items-center gap-3 mt-4">
+                                <span id="item-name" class="text-2xl md:text-4xl font-bold text-gray-700">玩具熊</span>
+                                <span id="item-small-price" class="bg-yellow-100 text-yellow-800 border-2 border-yellow-300 px-3 py-1 rounded-lg text-xl md:text-2xl font-black shadow-sm">$0</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 bg-amber-50 border-4 border-amber-300 rounded-xl px-4 py-3 w-full shadow-inner text-center">
+                            <p class="text-amber-800 text-sm md:text-base font-black mb-0">應付總額</p>
+                            <p id="ui-target-price" class="text-4xl md:text-5xl font-black text-amber-600 tracking-tighter">$0</p>
+                        </div>
+                    </div>
+
+                    <!-- 右上：付費區 -->
+                    <div class="w-full md:w-2/3 bg-emerald-50 rounded-2xl shadow-md border-2 border-emerald-300 p-4 flex flex-col relative">
+                        <div class="flex justify-between items-center mb-2 shrink-0">
+                            <h2 class="text-xl md:text-2xl font-bold text-emerald-800 flex items-center gap-2">
+                                <i data-lucide="shopping-bag" class="text-emerald-500 w-6 h-6"></i> 付款托盤
+                            </h2>
+                            <div class="flex items-center gap-3">
+                                <button onclick="clearMoney()" class="text-red-500 hover:text-red-700 flex items-center gap-1 font-bold text-base md:text-lg p-1.5 md:p-2 rounded-lg hover:bg-red-50 transition-colors">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i> 清空
+                                </button>
+                                <div class="bg-white px-4 py-1.5 rounded-lg border-2 border-emerald-200 text-right shadow-sm flex items-baseline gap-2 relative min-w-[120px] justify-between">
+                                    <span class="text-gray-500 text-sm md:text-base font-bold">已放入:</span>
+                                    <span id="ui-current-total" class="text-2xl md:text-3xl font-black text-emerald-600">$0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 托盤區域 -->
+                        <div id="tray-area" class="flex-1 bg-white rounded-xl border-2 border-dashed border-emerald-400 p-3 md:p-4 flex flex-wrap content-start gap-2 md:gap-3 overflow-y-auto shadow-inner no-scrollbar relative">
+                            <div id="tray-empty-msg" class="absolute inset-0 flex items-center justify-center text-emerald-300 text-lg md:text-2xl font-bold pointer-events-none text-center px-4">
+                                請從下方錢包選擇紙幣放入
+                            </div>
+                        </div>
+
+                        <!-- 結帳按鈕 -->
+                        <div class="absolute -bottom-5 right-2 md:right-6 z-20">
+                            <button id="btn-checkout" onclick="checkPayment()" disabled class="px-8 py-3 md:px-12 md:py-4 rounded-full text-xl md:text-2xl font-black text-white shadow-xl transform transition-all border-4 border-white bg-gray-400 cursor-not-allowed border-gray-200">
+                                確認結帳
+                            </button>
+                        </div>
+
+                        <!-- Overlays -->
+                        <div id="overlay-correct" class="hidden absolute inset-0 z-30 flex items-center justify-center bg-white/90 rounded-2xl transition-opacity duration-300">
+                            <div class="text-center">
+                                <i data-lucide="check-circle" class="text-green-500 w-32 h-32 mx-auto mb-4 drop-shadow-xl"></i>
+                                <p class="text-3xl font-black text-green-600">正確！速度很快！</p>
+                            </div>
+                        </div>
+                        
+                        <div id="overlay-wrong" class="hidden absolute inset-0 z-30 flex items-center justify-center bg-white/95 rounded-2xl transition-opacity duration-300">
+                            <div class="text-center animate-shake p-6">
+                                <i data-lucide="x-circle" class="text-red-500 w-24 h-24 mx-auto mb-3 drop-shadow-xl"></i>
+                                <p class="text-2xl md:text-4xl font-black text-red-600 mb-2">總金額不對喔！</p>
+                                <p id="wrong-hint" class="hidden text-lg font-bold text-gray-600 mt-2">(你放了 $<span id="wrong-amount">0</span>，再算算看)</p>
+                            </div>
+                        </div>
+
+                        <div id="overlay-suboptimal" class="hidden absolute inset-0 z-30 flex items-center justify-center bg-white/95 rounded-2xl transition-opacity duration-300">
+                            <div class="text-center p-6 flex flex-col items-center">
+                                <i data-lucide="alert-triangle" class="text-orange-500 w-20 h-20 mb-4 drop-shadow-lg"></i>
+                                <p class="text-2xl md:text-3xl font-black text-orange-600 mb-2">金額正確，但張數太多了！</p>
+                                <p id="suboptimal-hint-text" class="text-lg md:text-xl font-bold text-gray-700 mb-6 bg-orange-100 px-4 py-2 rounded-lg border-2 border-orange-200"></p>
+                                <button onclick="handleRetrySuboptimal()" class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full font-bold text-xl shadow-lg transform transition-transform hover:scale-105 active:scale-95">
+                                    我知道了，重新作答
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 錢包 -->
+                <div class="flex-1 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl shadow-md border-2 border-orange-200 p-3 md:p-4 flex flex-col overflow-hidden relative">
+                    <h2 class="text-xl md:text-2xl font-black text-orange-800 mb-2 md:mb-3 flex items-center gap-2 shrink-0 relative z-10">
+                        👛 我的錢包 <span class="text-sm md:text-base font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded-md">(點擊面額放入托盤)</span>
+                    </h2>
+                    <div class="flex-1 flex flex-col justify-center relative z-10 pb-2">
+                        <div id="wallet-area" class="flex flex-wrap justify-center gap-3 md:gap-6 px-2">
+                            <!-- JS 動態生成紙幣 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TRANSITION SCREEN ==================== -->
+        <div id="screen-transition" class="screen hidden w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-orange-100 to-red-100 relative">
+            <div class="bg-white p-8 md:p-12 rounded-3xl shadow-2xl max-w-xl w-full text-center border-4 border-red-500 relative z-10 animate-[zoom-in_0.5s]">
+                <i data-lucide="flame" class="text-red-500 w-20 h-20 mx-auto mb-4 drop-shadow-lg"></i>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-red-600 mb-4 tracking-wider">難度升級！</h1>
+                <div class="bg-red-50 rounded-xl p-6 my-6 border-2 border-red-200 shadow-inner text-left">
+                    <p class="text-xl md:text-2xl text-gray-800 font-black mb-3">進入 <strong>關卡 2 (心算挑戰)</strong> 🧠</p>
+                    <p class="text-lg md:text-xl text-red-600 font-black bg-white p-4 rounded-xl border-2 border-red-200 mb-3 flex items-center gap-3">
+                        <span class="text-3xl">⚠️</span> 
+                        <span>注意：<span class="underline decoration-red-400 decoration-4">不會</span>顯示目標金額！必須自己看著標價計算。</span>
+                    </p>
+                    <p class="text-lg md:text-xl text-gray-700 font-bold">請在心裡默默加上你放入的每一張紙幣，挑戰你的心算極限！💪</p>
+                </div>
+                <button onclick="handleTransitionNext()" class="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-5 rounded-2xl text-2xl font-bold transition-transform transform hover:scale-105 active:scale-95 shadow-xl flex justify-center items-center gap-2">
+                    我準備好了！繼續計時 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== RESULT SCREEN ==================== -->
+        <div id="screen-result" class="screen hidden w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-blue-50 to-blue-100 relative">
+            <div class="bg-white p-8 md:p-12 rounded-3xl shadow-2xl max-w-lg w-full text-center border-4 border-yellow-400 relative z-10">
+                <i data-lucide="star" class="text-yellow-400 w-24 h-24 mx-auto mb-4 fill-current drop-shadow-lg"></i>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">挑戰完成！</h1>
+                <p class="text-2xl text-blue-600 font-black mb-6">太棒了，<span id="result-name"></span>！</p>
+                
+                <div class="bg-blue-50 rounded-xl p-6 my-6 border-2 border-blue-100 shadow-inner">
+                    <p class="text-xl text-gray-500 font-bold mb-2">你的最終成績：</p>
+                    <div id="result-time" class="text-5xl md:text-6xl font-black text-red-500 tracking-wider">00:00.0</div>
+                    <p class="text-sm text-gray-400 mt-2 font-bold">(已記錄至排行榜)</p>
+                </div>
+
+                <div class="space-y-4">
+                    <button onclick="restartChallenge()" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-xl text-xl md:text-2xl font-bold transition-all shadow-lg flex justify-center items-center gap-2 transform hover:scale-105 active:scale-95">
+                        <i data-lucide="refresh-ccw" class="w-6 h-6"></i> 重新挑戰一次
+                    </button>
+                    <button onclick="showScreen('leaderboard')" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 p-4 rounded-xl text-xl md:text-2xl font-bold transition-all shadow-lg flex justify-center items-center gap-2 transform hover:scale-105 active:scale-95">
+                        <i data-lucide="trophy" class="w-6 h-6"></i> 查看2B排行榜
+                    </button>
+                    <button onclick="backToMenu()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl text-xl font-bold transition-all shadow-md flex justify-center items-center gap-2 active:scale-95">
+                        <i data-lucide="store" class="w-5 h-5"></i> 返回主選單
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== LEADERBOARD SCREEN ==================== -->
+        <div id="screen-leaderboard" class="screen hidden w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-yellow-200 to-yellow-50 relative">
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl max-w-lg w-full text-center border-4 border-yellow-400">
+                <i data-lucide="trophy" class="text-yellow-500 w-20 h-20 mx-auto mb-4 drop-shadow-md"></i>
+                <h1 class="text-4xl font-black text-gray-800 mb-6">2B排行榜</h1>
+                
+                <div class="bg-yellow-50 rounded-xl border-2 border-yellow-200 overflow-hidden mb-6 max-h-[50vh] overflow-y-auto shadow-inner no-scrollbar">
+                    <table class="w-full text-left">
+                        <thead class="bg-yellow-200 text-yellow-900 sticky top-0 shadow-sm">
+                            <tr>
+                                <th class="p-3 text-center">排名</th>
+                                <th class="p-3">挑戰者</th>
+                                <th class="p-3 text-right">完成時間</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <!-- 動態生成排行榜 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <button onclick="showScreen('menu')" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-xl text-xl font-bold transition-all shadow-lg flex justify-center items-center gap-2 transform hover:scale-105 active:scale-95">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i> 返回主選單
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 核心資料 ---
+        const BANKNOTES = [
+            { value: 500, label: '$500', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/500_Hong_Kong_dollars_Standard_Chartered_Bank_2010_obverse.jpg/800px-500_Hong_Kong_dollars_Standard_Chartered_Bank_2010_obverse.jpg', color: 'bg-yellow-700 text-white' },
+            { value: 100, label: '$100', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/100_Hong_Kong_dollars_HSBC_2010_obverse.jpg/800px-100_Hong_Kong_dollars_HSBC_2010_obverse.jpg', color: 'bg-red-500 text-white' },
+            { value: 50, label: '$50', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/50_Hong_Kong_dollars_Bank_of_China_2010_obverse.jpg/800px-50_Hong_Kong_dollars_Bank_of_China_2010_obverse.jpg', color: 'bg-emerald-600 text-white' },
+            { value: 20, label: '$20', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/20_Hong_Kong_dollars_Standard_Chartered_Bank_2010_obverse.jpg/800px-20_Hong_Kong_dollars_Standard_Chartered_Bank_2010_obverse.jpg', color: 'bg-blue-500 text-white' },
+            { value: 10, label: '$10', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/10_Hong_Kong_dollars_Hong_Kong_Government_2007_obverse.jpg/800px-10_Hong_Kong_dollars_Hong_Kong_Government_2007_obverse.jpg', color: 'bg-purple-600 text-white' },
+        ];
+
+        const ITEMS = [
+            { name: '玩具熊', emoji: '🧸' }, { name: '書包', emoji: '🎒' }, { name: '故事書', emoji: '📘' },
+            { name: 'T恤', emoji: '👕' }, { name: '波鞋', emoji: '👟' }, { name: '手錶', emoji: '⌚' },
+            { name: '拼圖', emoji: '🧩' }, { name: '顏色筆', emoji: '🖍️' }, { name: '畫板', emoji: '🎨' },
+            { name: '足球', emoji: '⚽' }, { name: '水樽', emoji: '💧' }, { name: '筆盒', emoji: '🧃' },
+            { name: '遙控車', emoji: '🏎️' }, { name: '耳機', emoji: '🎧' }, { name: '滑板', emoji: '🛹' }
+        ];
+
+        const QUESTIONS_PER_LEVEL = 3;
+
+        // --- 全域狀態 ---
+        let studentName = '';
+        let currentLevel = 1;
+        let questionCount = 1;
+        let roundPrices = [];
+        let targetPrice = 0;
+        let selectedMoney = []; // { id, value }
+        
+        let elapsedTime = 0;
+        let timerInterval = null;
+        let isTimerRunning = false;
+        let leaderboard = [];
+
+        // 初始化
+        window.onload = () => {
+            lucide.createIcons();
+            loadLeaderboard();
+            renderWallet();
+        };
+
+        // --- 核心邏輯函式 ---
+        function getOptimalBreakdown(amount) {
+            let available = [500, 100, 50, 20, 10];
+            let breakdown = {};
+            let remaining = amount;
+            for (let denom of available) {
+                if (remaining >= denom) {
+                    let num = Math.floor(remaining / denom);
+                    breakdown[denom] = num;
+                    remaining -= num * denom;
+                }
+            }
+            return breakdown;
+        }
+
+        function generateLevelPrices() {
+            let attempts = 0;
+            while (attempts < 2000) {
+                let prices = [];
+                let usedDenoms = new Set();
+                for (let i = 0; i < QUESTIONS_PER_LEVEL; i++) {
+                    let p = 0;
+                    let breakdown = {};
+                    let isValidPrice = false;
+                    while (!isValidPrice) {
+                        if (i === 0) p = 500 + Math.floor(Math.random() * 5) * 100 + Math.floor(Math.random() * 10) * 10;
+                        else if (i === 1) p = 100 + Math.floor(Math.random() * 4) * 100 + Math.floor(Math.random() * 10) * 10;
+                        else p = Math.floor(Math.random() * 9 + 1) * 10;
+                        breakdown = getOptimalBreakdown(p);
+                        let noteCount = Object.values(breakdown).reduce((sum, val) => sum + val, 0);
+                        if (noteCount >= 2 && p <= 990) isValidPrice = true;
+                    }
+                    prices.push(p);
+                    Object.keys(breakdown).forEach(d => usedDenoms.add(Number(d)));
+                }
+                prices.sort(() => Math.random() - 0.5);
+                let uniquePrices = new Set(prices);
+                if (uniquePrices.size < QUESTIONS_PER_LEVEL) { attempts++; continue; }
+                let allUsed = [500, 100, 50, 20, 10].every(d => usedDenoms.has(d));
+                if (allUsed) return prices;
+                attempts++;
+            }
+            return [680, 270, 40].sort(() => Math.random() - 0.5);
+        }
+
+        function formatTime(ms) {
+            const totalSeconds = ms / 1000;
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = Math.floor(totalSeconds % 60);
+            const tenths = Math.floor((totalSeconds * 10) % 10);
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${tenths}`;
+        }
+
+        // --- 計時器 ---
+        function startTimer() {
+            if (isTimerRunning) return;
+            isTimerRunning = true;
+            timerInterval = setInterval(() => {
+                elapsedTime += 100;
+                document.getElementById('ui-timer').innerText = formatTime(elapsedTime);
+            }, 100);
+        }
+
+        function stopTimer() {
+            isTimerRunning = false;
+            clearInterval(timerInterval);
+        }
+
+        // --- 畫面切換 ---
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`screen-${screenId}`).classList.remove('hidden');
+            if(screenId === 'leaderboard') renderLeaderboard();
+        }
+
+        // --- 遊戲流程 ---
+        function startGame() {
+            const input = document.getElementById('input-name').value.trim();
+            if (!input) {
+                alert("請先輸入挑戰者姓名！");
+                return;
+            }
+            studentName = input;
+            elapsedTime = 0;
+            document.getElementById('ui-timer').innerText = formatTime(0);
+            startLevel(1);
+        }
+
+        function restartChallenge() {
+            elapsedTime = 0;
+            document.getElementById('ui-timer').innerText = formatTime(0);
+            startLevel(1);
+        }
+
+        function backToMenu() {
+            document.getElementById('input-name').value = '';
+            studentName = '';
+            stopTimer();
+            showScreen('menu');
+        }
+
+        function startLevel(level) {
+            roundPrices = generateLevelPrices();
+            currentLevel = level;
+            loadQuestion(1, roundPrices[0]);
+            showScreen('playing');
+            startTimer();
+        }
+
+        function loadQuestion(qIndex, price) {
+            questionCount = qIndex;
+            targetPrice = price;
+            selectedMoney = [];
+            
+            const randomItem = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+            
+            // 更新 UI
+            document.getElementById('ui-level').innerText = currentLevel;
+            document.getElementById('ui-level-name').innerText = currentLevel === 1 ? '直接付款' : '心算挑戰';
+            document.getElementById('ui-question').innerText = questionCount;
+            
+            document.getElementById('item-emoji').innerText = randomItem.emoji;
+            document.getElementById('item-name').innerText = randomItem.name;
+            document.getElementById('item-small-price').innerText = `$${targetPrice}`;
+
+            const isHidden = currentLevel === 2;
+            document.getElementById('ui-target-price').innerText = isHidden ? '???' : `$${targetPrice}`;
+            
+            renderTray();
+        }
+
+        function handleTransitionNext() {
+            startLevel(2);
+        }
+
+        // --- 貨幣互動 ---
+        function addMoney(value) {
+            selectedMoney.push({ id: Date.now() + Math.random(), value: value });
+            renderTray();
+        }
+
+        function removeMoney(id) {
+            selectedMoney = selectedMoney.filter(m => m.id !== id);
+            renderTray();
+        }
+
+        function clearMoney() {
+            selectedMoney = [];
+            renderTray();
+        }
+
+        // --- 渲染 UI ---
+        function createMoneyHTML(money, onClickAttr, isSelectable = true) {
+            const noteObj = BANKNOTES.find(n => n.value === money.value);
+            const baseClasses = `flex items-center justify-center shadow-sm transition-transform duration-200 shrink-0 select-none ${isSelectable ? 'cursor-pointer hover:-translate-y-1 hover:shadow-lg active:scale-95' : ''}`;
+            const sizeClasses = 'h-12 sm:h-14 md:h-16 w-auto rounded-md object-cover border border-gray-200 bg-white';
+            const fallbackClasses = `w-24 h-12 sm:w-28 sm:h-14 md:w-32 md:h-16 rounded-md border-2 border-white/30 font-bold text-lg md:text-xl flex items-center justify-center ${noteObj.color}`;
+            
+            // 使用 img, 若錯誤則套用 fallback 樣式
+            return `<img src="${noteObj.img}" alt="${noteObj.label}" onclick="${onClickAttr}" draggable="false" 
+                        class="${baseClasses} ${sizeClasses}" 
+                        onerror="this.outerHTML='<div onclick=&quot;${onClickAttr}&quot; class=\\'${baseClasses} ${fallbackClasses}\\'>${noteObj.label}</div>'"/>`;
+        }
+
+        function renderWallet() {
+            const container = document.getElementById('wallet-area');
+            container.innerHTML = BANKNOTES.map(note => 
+                createMoneyHTML({value: note.value}, `addMoney(${note.value})`)
+            ).join('');
+        }
+
+        function renderTray() {
+            const isHidden = currentLevel === 2;
+            const currentTotal = selectedMoney.reduce((sum, m) => sum + m.value, 0);
+            
+            // 更新總數顯示
+            const totalEl = document.getElementById('ui-current-total');
+            totalEl.innerText = isHidden ? '???' : `$${currentTotal}`;
+            totalEl.className = `text-2xl md:text-3xl font-black ${isHidden ? 'text-gray-400' : 'text-emerald-600'}`;
+
+            // 更新按鈕狀態
+            const btn = document.getElementById('btn-checkout');
+            if (selectedMoney.length === 0) {
+                btn.disabled = true;
+                btn.className = "px-8 py-3 md:px-12 md:py-4 rounded-full text-xl md:text-2xl font-black text-white shadow-xl transform transition-all border-4 border-white bg-gray-400 cursor-not-allowed border-gray-200";
+            } else {
+                btn.disabled = false;
+                btn.className = "px-8 py-3 md:px-12 md:py-4 rounded-full text-xl md:text-2xl font-black text-white shadow-xl transform transition-all border-4 border-white bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-105 active:scale-95 hover:shadow-2xl";
+            }
+
+            // 渲染鈔票
+            const tray = document.getElementById('tray-area');
+            const msg = document.getElementById('tray-empty-msg');
+            
+            if (selectedMoney.length === 0) {
+                tray.innerHTML = '';
+                msg.innerText = isHidden ? "請將所需紙幣放入，不要忘記加總喔！" : "請從下方錢包選擇紙幣放入";
+                tray.appendChild(msg);
+                msg.classList.remove('hidden');
+            } else {
+                msg.classList.add('hidden');
+                tray.innerHTML = selectedMoney.map(m => 
+                    createMoneyHTML(m, `removeMoney(${m.id})`)
+                ).join('');
+            }
+        }
+
+        // --- 驗證與回饋 ---
+        function showOverlay(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function hideOverlays() {
+            document.getElementById('overlay-correct').classList.add('hidden');
+            document.getElementById('overlay-wrong').classList.add('hidden');
+            document.getElementById('overlay-suboptimal').classList.add('hidden');
+        }
+
+        function checkPayment() {
+            const currentTotal = selectedMoney.reduce((sum, item) => sum + item.value, 0);
+            const isHidden = currentLevel === 2;
+
+            if (currentTotal !== targetPrice) {
+                document.getElementById('wrong-amount').innerText = currentTotal;
+                const hint = document.getElementById('wrong-hint');
+                if(isHidden) hint.classList.remove('hidden'); else hint.classList.add('hidden');
+                
+                showOverlay('overlay-wrong');
+                setTimeout(hideOverlays, 1500);
+                return;
+            }
+
+            const optimalBreakdown = getOptimalBreakdown(targetPrice);
+            const optimalCount = Object.values(optimalBreakdown).reduce((a, b) => a + b, 0);
+
+            if (selectedMoney.length > optimalCount) {
+                let userCounts = {};
+                selectedMoney.forEach(m => userCounts[m.value] = (userCounts[m.value] || 0) + 1);
+                let inefficientDenoms = [];
+                for (let val in userCounts) {
+                    if (userCounts[val] > (optimalBreakdown[val] || 0)) inefficientDenoms.push(parseInt(val));
+                }
+                
+                let hintText = "💡 提示：你可以用更少的紙幣數量來付款喔！系統已幫你退回多餘的部分。";
+                if (inefficientDenoms.length > 0) {
+                    inefficientDenoms.sort((a,b) => a - b);
+                    hintText = `💡 提示：試試看把多張 $${inefficientDenoms[0]} 換成更大的面額吧！系統已幫你刪除多餘的部分囉。`;
+                }
+                
+                document.getElementById('suboptimal-hint-text').innerText = hintText;
+                showOverlay('overlay-suboptimal');
+                return;
+            }
+
+            // 正確
+            showOverlay('overlay-correct');
+            setTimeout(() => {
+                hideOverlays();
+                if (questionCount < QUESTIONS_PER_LEVEL) {
+                    loadQuestion(questionCount + 1, roundPrices[questionCount]);
+                } else {
+                    if (currentLevel === 1) {
+                        stopTimer();
+                        showScreen('transition');
+                    } else {
+                        stopTimer();
+                        finishGame();
+                    }
+                }
+            }, 1500);
+        }
+
+        function handleRetrySuboptimal() {
+            const optimalBreakdown = getOptimalBreakdown(targetPrice);
+            let keptMoney = [];
+            let currentCounts = {};
+
+            selectedMoney.forEach(m => {
+                let valStr = String(m.value);
+                currentCounts[valStr] = (currentCounts[valStr] || 0) + 1;
+                let optVal = optimalBreakdown[valStr] || 0;
+                if (currentCounts[valStr] <= optVal) keptMoney.push(m);
+            });
+
+            selectedMoney = keptMoney;
+            hideOverlays();
+            renderTray();
+        }
+
+        function finishGame() {
+            const finalTime = elapsedTime;
+            leaderboard.push({ name: studentName, time: finalTime, date: new Date().toLocaleDateString() });
+            leaderboard.sort((a, b) => a.time - b.time);
+            
+            try { localStorage.setItem('paperMoneySpeedLeaderboard', JSON.stringify(leaderboard)); } catch(e) {}
+            
+            document.getElementById('result-name').innerText = studentName;
+            document.getElementById('result-time').innerText = formatTime(finalTime);
+            showScreen('result');
+        }
+
+        // --- 排行榜 ---
+        function loadLeaderboard() {
+            try {
+                const saved = localStorage.getItem('paperMoneySpeedLeaderboard');
+                if (saved) leaderboard = JSON.parse(saved);
+            } catch(e) {}
+        }
+
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboard-body');
+            if (leaderboard.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-gray-500 font-bold">目前還沒有紀錄，快成為第一位挑戰者！</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = leaderboard.map((record, index) => {
+                let rankStr = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `<span class="text-gray-500 text-lg">${index + 1}</span>`;
+                return `
+                <tr class="border-b border-yellow-100 last:border-0 hover:bg-yellow-100 transition-colors">
+                    <td class="p-3 text-center font-bold text-2xl">${rankStr}</td>
+                    <td class="p-3 font-bold text-gray-800 text-lg">${record.name}</td>
+                    <td class="p-3 text-right font-mono font-black text-blue-600 text-lg">${formatTime(record.time)}</td>
+                </tr>`;
+            }).join('');
+        }
+
+    </script>
+</body>
+</html>

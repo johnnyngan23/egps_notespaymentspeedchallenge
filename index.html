@@ -515,15 +515,11 @@
 
             // 渲染鈔票
             const tray = document.getElementById('tray-area');
-            const msg = document.getElementById('tray-empty-msg');
             
             if (selectedMoney.length === 0) {
-                tray.innerHTML = '';
-                msg.innerText = isHidden ? "請將所需紙幣放入，不要忘記加總喔！" : "請從下方錢包選擇紙幣放入";
-                tray.appendChild(msg);
-                msg.classList.remove('hidden');
+                const msgText = isHidden ? "請將所需紙幣放入，不要忘記加總喔！" : "請從下方錢包選擇紙幣放入";
+                tray.innerHTML = `<div id="tray-empty-msg" class="absolute inset-0 flex items-center justify-center text-emerald-300 text-lg md:text-2xl font-bold pointer-events-none text-center px-4">${msgText}</div>`;
             } else {
-                msg.classList.add('hidden');
                 tray.innerHTML = selectedMoney.map(m => 
                     createMoneyHTML(m, `removeMoney(${m.id})`)
                 ).join('');
